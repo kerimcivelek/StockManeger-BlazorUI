@@ -1,0 +1,457 @@
+﻿@page "/ProductFeatures"
+
+@inject ICategoryService categoryService
+@inject IProductService productservice
+@inject IToastService toastService
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card card-primary card-outline">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-edit"></i>
+                    Ürün Kart Tanımlama İşlemleri
+                </h3>
+            </div>
+
+            <div class="row">
+                <div class="col-md-3">
+
+
+                    <div class="card card-secondary">
+                        <div class="card-header">
+                            <div class="card-tools">
+                                <button type="button " class="btn btn-xs btn-info " @onclick="NewProduct">
+                                    <i class="fas fa-barcode"></i>  Yeni Kayıt
+                                </button>
+                            
+                            </div>
+                        </div>
+                        <EditForm Model="@product" OnValidSubmit="AddProduct" required="required">
+                            <div class="card-body">
+                                      
+                                    <div class="form-group">
+                                    <label for="inputStatus"> Ürün Grubu </label>
+                                    @if (basecategories != null)
+                                    {
+
+                                       
+                                        <InputSelectNumber id="CategoryType" Class="form-control" required="required"
+                                                       ValueChanged="@((int catTypeId) => SelectBaseCategory(catTypeId))"
+                                                       ValueExpression="@(() => product.CategoryType )"
+                                                       Value="product.CategoryType ">
+                                            @foreach (var data in basecategories)
+                                            {
+                                                <option value="@data.Id">@data.Name</option>
+                                            }
+
+                                        </InputSelectNumber>
+                                    }
+
+                                    </div>
+                                 
+                                <div class="form-group">
+                                    <label for="inputStatus">Kategori</label>
+                                    @if (categories != null)
+                                    {
+                                        <InputSelectNumber id="CategoryId" Class="form-control" required="required"
+                                                       ValueChanged="@((int value) => SelectCategory(value))"
+                                                       ValueExpression="@(() => product.CategoryId )"
+                                                       Value="product.CategoryId ">
+                                            <option tabindex="0" value="0" selected>Seçiniz </option>
+                                            @foreach (var data in categories)
+                                            {
+                                                <option value="@data.Id">@data.Name</option>
+                                            }
+
+                                        </InputSelectNumber>
+                                    }
+                                    else
+                                    {
+                                        <select class="form-control">
+                                            <option tabindex="0" value="0" selected>Seçiniz </option>
+                                        </select>
+                                    }
+                                </div>
+                                <div class="form-group">
+                                    <label for="inputStatus">Marka</label>
+                                    @if (Brands != null)
+                                    {
+
+                                        <InputSelectNumber id="BrandId" Class="form-control" required="required"
+                                                       ValueChanged="@((int brandvalue) => SelectBrand(brandvalue))"
+                                                       ValueExpression="@(() => product.BrandId )"
+                                                       Value="product.BrandId ">
+                                            <option tabindex="0" value="0" selected>Seçiniz </option>
+                                            @foreach (var data in Brands)
+                                            {
+                                                <option value="@data.Id">@data.BrandName</option>
+                                            }
+                                        </InputSelectNumber>
+                                    }
+                                    else
+                                    {
+                                        <select class="form-control">
+                                            <option tabindex="0" value="0" selected>Seçiniz</option>
+                                        </select>
+                                    }
+                                </div>
+                                <div class="form-group">
+                                    <label for="inputStatus">Model</label>
+                                    @if (Models != null)
+                                    {
+
+                                        <InputSelectNumber id="ModelId" Class="form-control" @bind-Value="product.ModelId " required="required">
+                                            <option tabindex="0" value="0" selected>Seçiniz</option>
+                                            @foreach (var data in Models)
+                                            {
+                                                <option value="@data.Id">@data.ModelName</option>
+                                            }
+                                        </InputSelectNumber>
+
+                                    }
+                                    else
+                                    {
+                                        <select class="form-control">
+                                            <option tabindex="0" value="0" selected>Seçiniz</option>
+                                        </select>
+                                    }
+
+                                </div>
+                                @if (IsCategoyTypeDivace == true)
+                                {
+                                    <div class="form-group">
+                                        <label for="inputClientCompany">Hafıza</label>
+                                        <InputSelectNumber Class="form-control"  @bind-Value="product.Capacity" required="required" >
+                                            <option tabindex="0" value="0" selected>Seçiniz </option>
+                                            <option value="32 Gb">32 GB</option>
+                                            <option value="64 Gb">64 GB</option>
+                                            <option value="128 Gb">128 GB</option>
+                                            <option value="256 Gb">256 GB</option>
+                                            <option value="512 Gb">512 GB</option>
+                                            <option value="1 Tb">1 TB </option>
+                                        </InputSelectNumber>
+                                    </div>
+                                }
+                                else
+                                {
+                                    product.Capacity = "-";
+                                }
+                               
+                                
+                                @if (IsCategoyTypeDivace == true)
+                                {
+                                    <div class="form-group">
+                                        <label for="inputClientCompany">RAM</label>
+                                        <InputSelectNumber Class="form-control" @bind-Value=product.Ram required="required">
+                                            <option tabindex="0" value="0" selected>Seçiniz </option>
+                                            <option value="1 Gb">1 GB</option>
+                                            <option value="2 Gb">2 GB</option>
+                                            <option value="3 Gb">3 GB</option>
+                                            <option value="4 Gb">4 GB</option>
+                                            <option value="6 Gb">6 GB</option>
+                                            <option value="8 Gb">8 GB</option>
+                                            <option value="12 Gb">12 GB</option>
+                                            <option value="16 Gb">16 GB</option>
+                                        </InputSelectNumber>
+                                    </div>
+                                }
+                                else
+                                {
+                                    product.Ram = "-";
+                                }
+                               
+                                <div class="form-group">
+                                    <label for="inputProjectLeader">Renk</label>
+                                    <InputSelectNumber Class="form-control" @bind-Value=product.Colour required="required">
+                                        <option tabindex="0" value="0" selected>Seçiniz </option>
+                                        <option value="Beyaz">Beyaz</option>
+                                        <option value="Siyah">Siyah</option>
+                                        <option value="Bej">Bej</option>
+                                        <option value="Gümüş">Gümüş</option>
+                                        <option value="Gri">Gri</option>
+                                        <option value="Yeşil">Yeşil</option>
+                                        <option value="Mavi">Mavi </option>
+                                        <option value="Sarı">Sarı </option>
+                                        <option value="Pembe">Pembe </option>
+                                    </InputSelectNumber>
+                                </div>
+                                <div class="form-group">
+                                    <label for="inputDescription">Min. Stok</label>
+                                    <InputNumber Class="form-control" Id="Note" @bind-Value="@product.Min" />
+                                </div>
+                                     <div class="form-group">
+                                    <label for="inputDescription">Max. Stok</label>
+                                    <InputNumber Class="form-control" Id="Note" @bind-Value="@product.Max" />
+                                </div>
+                                <div class="form-group">
+                                    <label for="inputDescription">Ek Açıklama</label>
+                                    <InputTextArea Class="form-control" Id="Note" @bind-Value="@product.Note" />
+                                </div>
+                                <div class="form-group">
+                                    <label for="inputDescription">Aktif</label>
+                                    <InputCheckbox type="checkbox" Class="custom-control-input-danger" Id="status" @bind-Value="@product.status" />
+
+                                </div>
+                            </div>
+
+                            <!-- /.card-body -->
+                            <div class="card-footer">
+                                <button type="submit" class="btn btn-sm btn-info float-right">
+                                    <i class="fas fa-save"></i>@buttonText
+                                </button>
+
+                            </div>
+                        </EditForm>
+                    </div>
+
+                    <!-- /.card -->
+                </div>
+                <div class="col-md-9">
+                    <div class="card card-secondary">
+                        <div class="card-header">
+                            <h3 class="card-title">Ürün Kart Listesi</h3>
+
+                            <div class="card-tools">
+                                <button type="button" class="btn btn-tool">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body table-responsive ">
+                            @if (products == null)
+                            {
+
+                                if (IsLoading)
+
+                                {
+
+                                    <div class="text-center">
+                                        <img src="/img/loading.gif">
+                                    </div>
+
+                                }
+                                else
+                                {
+
+                                }
+                            }
+                            else
+                            {
+
+
+                                <table id="dtable" class="table table-bordered table-striped table-hover ">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Tür</th>
+                                            <th>Kategori Adı</th>
+                                            <th>Marka</th>
+                                            <th>Model</th>
+                                            <th>Renk</th>
+                                            <th>Kapasite</th>
+                                            <th>Ram</th>
+                                            <th>Min. Stok</th>
+                                            <th>Max. Stok</th>
+                                            <th>Not</th>
+
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var i in products)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    <i class="btn btn-warning btn-xs align-middle" @onclick="@(() => EditProduct(i.Id ,i.CategoryType))"><i class="fas fa-edit"></i></i>
+                                                </td>
+                                                <td>@i.CategoryTypeName</td>
+                                                <td>@i.CategoryName</td>
+                                                <td>@i.BrandName</td>
+                                                <td>@i.ModelName</td>
+                                                <th>@i.Color</th>
+                                                <td>@i.Capacity</td>
+                                                <td>@i.Ram</td>
+                                                 <td>@i.MinStock</td>
+                                                  <td>@i.MaxStock</td>
+                                                <td>@i.Note</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            }
+
+
+
+                            <div class="modal fade" id="modal-edit">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h4 class="modal-title"> <i class="fas fa-edit"> </i> Düzenle</h4>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+
+                                    </div>
+                                    <!-- /.modal-content -->
+                                </div>
+                                <!-- /.modal-dialog -->
+                            </div>
+                        </div>
+                        <!-- /.card-body -->
+                    </div>
+                    <!-- /.card -->
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+@code {
+    BaseCategoryDto[] basecategories;
+    CategoryDto[] categories;
+    BrandDto[] Brands;
+    ModelDto[] Models;
+    ProductCartDto[] products;
+    ProductDto product = new ProductDto();
+    CategoryDto categoryModel = new CategoryDto();
+    ModelDto lmodel = new ModelDto();
+
+    public string buttonText { get; set; }
+
+    public string cssText { get; set; }
+    public bool IsCategoyTypeDivace { get; set; } 
+    public bool IsLoading { get; set; } = true;
+    protected override async Task OnInitializedAsync()
+    {
+
+        basecategories = await categoryService.BaseCategory();
+        products = await productservice.ProductCartList();
+        buttonText = " Kaydet";
+        await JSRuntime.InvokeVoidAsync("baseDataTables", "#dtable");
+
+
+    }
+
+
+    private async Task SelectBaseCategory(int catTypeId)
+    {
+        if (catTypeId == 1 || catTypeId==2)
+        {
+            IsCategoyTypeDivace = true;
+        } 
+        else
+        {
+            IsCategoyTypeDivace = false;
+        }
+
+        categories = null;
+        product.CategoryType = catTypeId;
+        await ResultCategoryList(catTypeId);
+
+
+    }
+    private async Task ResultCategoryList(int Id)
+    {
+        categories = await categoryService.GetCategoryById(Id);
+        StateHasChanged();
+
+    }
+
+
+
+    private async Task SelectCategory(int value)
+    {
+
+        Brands = null;
+        product.CategoryId = value;
+        await ResultBrandist(value);
+
+
+    }
+    private async Task ResultBrandist(int CategoryId)
+    {
+        Brands = await categoryService.Brands(CategoryId);
+        StateHasChanged();
+
+    }
+    private async Task SelectBrand(int brandvalue)
+    {
+
+        Models = null;
+        product.BrandId = brandvalue;
+        await ResultModelList(brandvalue);
+
+    }
+    private async Task ResultModelList(int BrandId)
+    {
+        Models = await categoryService.Models(BrandId);
+        StateHasChanged();
+    }
+
+
+
+    private async void AddProduct()
+    {
+
+        try
+        {
+
+            await productservice.ProductAdd(product);
+
+
+        }
+        catch (Exception e)
+        {
+            toastService.ShowSuccess(e.Message.ToString(), lmodel.ModelName);
+
+        }
+        products = await productservice.ProductCartList();
+        NewProduct();
+        StateHasChanged();
+
+
+    }
+
+    private async void EditProduct(int Id , int CategoryType)
+    {
+
+        product = await productservice.GetByProduct(Id);
+
+        if (CategoryType == 1 || CategoryType==2)
+        {
+            IsCategoyTypeDivace = true;
+            StateHasChanged();
+        }
+
+
+        SelectBrand(product.BrandId);
+        SelectCategory(product.CategoryId);
+        SelectBaseCategory(CategoryType);
+        buttonText = " Güncelle";
+        StateHasChanged();
+
+
+
+    }
+    private async void NewProduct()
+    {
+        product.CategoryId = 0;
+        product.Id = 0;
+        product.CategoryId = 0;
+        product.BrandId = 0;
+        product.ModelId = 0;
+        product.Ram ="Seçiniz";
+        product.Capacity = "Seçiniz";
+        product.Colour = "Seçiniz";
+        product.Note = null;
+        buttonText = "Kaydet";
+
+    }
+
+    
+
+}

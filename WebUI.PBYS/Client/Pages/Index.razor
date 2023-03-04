@@ -1,0 +1,178 @@
+﻿@page "/Index"
+
+@inject IDashboardService dashboardservice
+
+    <div class="container-fluid">
+           <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">   <span class="text-primary">  <strong> <i class=" ion ion-stats-bars"></i> Günlük İşlemler </strong> </span> </h3>
+
+            </div>
+        <div class="row">
+            <div class="col-md-3 col-sm-6 col-12">
+                <div class="info-box">
+                    <span class="info-box-icon bg-info"><i class="ion ion-stats-bars"></i></span>
+
+                    <div class="info-box-content">
+                        <span class="info-box-text">Toplam</span>
+                        <span class="info-box-number">@dashboard.Sum(x=> x.EntryOut==1 ? x.Quantity:0)</span>
+                    </div>
+                    <!-- /.info-box-content -->
+                </div>
+                <!-- /.info-box -->
+            </div>
+            <!-- /.col -->
+            <div class="col-md-3 col-sm-6 col-12">
+                <div class="info-box">
+                    <span class="info-box-icon bg-success"><i class="fas fa-lira-sign"></i></span>
+
+                    <div class="info-box-content">
+                        <span class="info-box-text">Giriş Tutar</span>
+                        <span class="info-box-number">@dashboard.Sum(x=> x.EntryOut==1 ? x.Price:0).ToString("C")</span>
+                    </div>
+                    <!-- /.info-box-content -->
+                </div>
+                <!-- /.info-box -->
+            </div>
+            <!-- /.col -->
+            <div class="col-md-3 col-sm-6 col-12">
+                <div class="info-box">
+                    <span class="info-box-icon bg-warning"><i class="ion ion-stats-bars"></i></span>
+
+                    <div class="info-box-content">
+                        <span class="info-box-text">Toplam Çıkış</span>
+                        <span class="info-box-number">@dashboard.Sum(x=> x.EntryOut==0 ? x.Quantity:0)</span>
+                    </div>
+                    <!-- /.info-box-content -->
+                </div>
+                <!-- /.info-box -->
+            </div>
+            <!-- /.col -->
+            <div class="col-md-3 col-sm-6 col-12">
+                <div class="info-box">
+                    <span class="info-box-icon bg-info">  <i class="fas fa-lira-sign"></i>  </span>
+
+                    <div class="info-box-content">
+                        <span class="info-box-text">Çıkış Tutar</span>
+                        <span class="info-box-number">@dashboard.Sum(x=> x.EntryOut==0 ? x.Price:0).ToString("C")</span>
+                    </div>
+                    <!-- /.info-box-content -->
+                </div>
+                <!-- /.info-box -->
+            </div>
+            <!-- /.col -->
+        </div>
+            </div>
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">   <span class="text-primary">  <strong> <i class=" ion ion-stats-bars"></i> Günlük İşlem Detayları </strong> </span> </h3>
+
+        </div>
+        <div class="row">
+            <div class="col-md-6 col-sm-6 col-12">
+                <div class="info-box">
+
+                    @if (dashboarddetailEntry == null)
+                    {
+                        <h5 class="text-primary text-center  "><i class="far fa-file-alt mr-1"></i> Ürün Seçilmemiş</h5>
+
+                    }
+                    else
+                    {
+                        <table class="table table-bordered table-striped table-hover table-head-fixed text-nowrap ">
+                            <thead>
+                                <tr>
+                                    <th>İşlem</th>
+                                    <th>Kategori</th>
+                                    <th>Ürün</th>
+                                    <th>Miktar</th>
+                                    <th>Fiyat</th>
+                                  
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var i in dashboarddetailEntry)
+                                {
+                                    <tr>
+                                        <td class="align-middle"><small class="badge badge-success">Giriş</small>  </td>
+                                        <td>@i.CategoryName</td>
+                                        <td>@i.ProductName</td>
+                                        <td>@i.Quantity</td>
+                                        <td>@i.Price.ToString("C")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                    <!-- /.info-box-content -->
+                </div>
+                <!-- /.info-box -->
+            </div>
+            <!-- /.col -->
+            <div class="col-md-6 col-sm-6 col-12">
+                <div class="info-box">
+
+                    @if (dashboarddetailOutPut == null)
+                    {
+                        <h5 class="text-primary text-center  "><i class="far fa-file-alt mr-1"></i> Ürün Seçilmemiş</h5>
+
+                    }
+                    else
+                    {
+                        <table class="table table-bordered table-striped table-hover table-head-fixed text-nowrap ">
+                            <thead>
+                                <tr>
+                                    <th>İşlem</th>
+                                    <th>Kategori</th>
+                                    <th>Ürün</th>
+                                    <th>Miktar</th>
+                                    <th>Fiyat</th>
+
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var i in dashboarddetailOutPut)
+                                {
+                                    <tr>
+                                        <td class="align-middle"><small class="badge badge-warning">Çıkış</small>  </td>
+                                        <td>@i.CategoryName</td>
+                                        <td>@i.ProductName</td>
+                                        <td>@i.Quantity</td>
+                                        <td>@i.Price.ToString("C")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                    <!-- /.info-box-content -->
+                </div>
+                <!-- /.info-box -->
+            </div>
+            
+            <!-- /.col -->
+        </div>
+    </div>
+            </div>
+            
+@code {
+
+    DashBoardTotalDto[] dashboard ;
+    DashboardDetailDto[] dashboarddetailEntry;
+    DashboardDetailDto[] dashboarddetailOutPut;
+
+    protected override async Task OnInitializedAsync()
+    {
+        dashboard = await dashboardservice.DashboardTotalDay();
+        dashboarddetailEntry = await dashboardservice.DashboardDetailDay(1);
+        dashboarddetailOutPut = await dashboardservice.DashboardDetailDay(0);
+
+      
+        
+
+    }
+
+
+ }
+ 
+
+    

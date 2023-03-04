@@ -1,0 +1,94 @@
+﻿@page "/CategoryFeatures"
+
+@inject IJSRuntime JSRuntime
+
+@*@attribute [Authorize]*@
+<div class="row">
+    <div class="col-md-3">
+        
+    
+
+        <div class="card card-primary card-outline">
+            <div class="card-header">
+                <h3 class="card-title">    <i class="fas fa-pencil-alt mr-1"></i> Özellik Tanım Listesi</h3>
+
+                <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <ul class="nav nav-pills flex-column">
+                    <li class="nav-item active">
+                        <a href="" @onclick="@(() => ComponentNavi(1))" class="nav-link">
+                            <i class="fas fa-folder"></i> Kategori
+                           
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="" @onclick="@(() => ComponentNavi(2))" class="nav-link">
+                            <i class="fas fa-folder"></i> Marka
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" @onclick="@(() => ComponentNavi(3))" class="nav-link">
+                            <i class="fas fa-folder"></i> Model
+                        </a>
+                    </li>
+                  @*  <li class="nav-item">
+                        <a href="#" class="nav-link">
+                            <i class="fas fa-folder"></i> Dahili Hafıza
+                            
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">
+                            <i class="fas fa-folder"></i> Ram
+                          
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">
+                            <i class="fas fa-folder"></i> Renk
+                          
+                        </a>
+                    </li>*@
+                </ul>
+            </div>
+            <!-- /.card-body -->
+        </div>
+  
+  
+    </div>
+     @if (ComponentNavigation==1)
+    {
+        <CategoryComponent/> 
+    }
+    else if (ComponentNavigation == 2)
+    {
+        <BrandComponent />
+    }
+    else if (ComponentNavigation == 3)
+    {
+        <ModelComponent/>
+    }
+    
+    <!-- /.col -->
+</div>
+
+@code {
+
+ 
+ 
+
+    public int ComponentNavigation { get; set; }
+
+    int ComponentNavi(int Id)
+    {
+      return  ComponentNavigation = Id;
+     
+    }
+  
+
+}

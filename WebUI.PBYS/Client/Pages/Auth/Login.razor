@@ -1,0 +1,81 @@
+﻿@page "/login"
+
+@layout LoginLayout
+
+
+@inject IToastService toastService
+@inject IloginService loginservice;
+@inject ILocalStorageService LocalStorage
+@inject NavigationManager NavigationManager
+@inject HttpClient Http
+
+<div class="card card-outline card-primary">
+    <div class="card-header text-center">
+        <a href="../../index2.html" class="h1"><b>Ü</b>BYS</a>
+    </div>
+    <div class="card-body">
+        <p class="login-box-msg">ürün Bilgi Yönetim Sistemi</p>
+
+         <EditForm Model="@loginDto">
+            <div class="input-group mb-3">
+                <InputText @bind-Value="loginDto.UserName" id="UserName" placeholder="Kullanıcı Adınızı Giriniz" class="form-control " required="required" />
+                <div class="input-group-append">
+                    <div class="input-group-text">
+                        <span class="fas fa-envelope"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="input-group mb-3">
+                <InputText @bind-Value="loginDto.Password" type="password" id="Password" placeholder="Parolanızı Giriniz" class="form-control " required="required" />
+                <div class="input-group-append">
+                    <div class="input-group-text">
+                        <span class="fas fa-lock"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-8">
+                    <div class="icheck-primary">
+                        <input type="checkbox" id="remember">
+                        <label for="remember">
+                           Beni Hatırla
+                        </label>
+                    </div>
+                </div>
+                <!-- /.col -->
+                <div class="col-4">
+                    <button type="submit" @onclick="@HandleLogin" class="btn btn-primary btn-block">Giriş</button>
+                </div>
+                <!-- /.col -->
+            </div>
+        </EditForm>
+  
+    </div>
+    <!-- /.card-body -->
+</div>
+
+@code {
+
+    LoginDto loginDto = new LoginDto();
+    public string messages { get; private set; }
+    private async Task HandleLogin()
+    {
+        toastService.ShowInfo("Lütfen Bekleyiniz...", "Giriş");
+        try
+        {
+            await loginservice.LoginControl(loginDto);
+              
+                toastService.ShowSuccess("Yükleniyor", "Giriş Başarılı");
+            NavigationManager.NavigateTo("/Index");
+
+         
+        }
+        catch (Exception)
+        {
+
+
+            toastService.ShowError("Kullanıcı adı veya şifre hatalı", "Giriş Yapılamadı");
+        }
+    }
+
+}

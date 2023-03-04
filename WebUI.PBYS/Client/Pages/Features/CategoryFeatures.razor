@@ -1,0 +1,366 @@
+﻿@page "/CategoryFeatures1"
+
+
+@inject ICategoryService categoryService
+@inject IToastService toastService
+@inject NavigationManager NavigationManager
+
+
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card card-primary card-outline">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-edit"></i>
+                    Tanımlama İşlemleri
+                </h3>
+            </div>
+            <div class="card-body">
+                <button type="button" class="btn btn-default" data-toggle="modal" data-target="#modal-default">
+                    <i class="fas fa-plus"></i> Yeni Kategori
+                </button>
+                <button type="button" class="btn btn-default" data-toggle="modal" data-target="#modal-default-marka">
+                    <i class="fas fa-plus"></i> Yeni Marka
+                </button>
+                <button type="button" class="btn btn-default" data-toggle="modal" data-target="#modal-default-model">
+                    <i class="fas fa-plus"></i> Yeni Model
+                </button>
+                <button type="button" class="btn btn-info" @onclick="ProductFeatures">
+                    <i class="nav-icon fas fa-barcode"></i> Ürün Kartı
+                </button>
+                <div class="modal fade" id="modal-default">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h4 class="modal-title"> <i class="fas fa-edit"> </i> Yeni Kategori Ekle</h4>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <EditForm Model="@CategoryModel">
+                                <DataAnnotationsValidator />
+                                <ValidationSummary />
+                                <div class="modal-body">
+
+                                    <div class="card-body">
+                                      
+                                        <div class="form-group">
+                                            <label for="inputName">Kategori Adı</label>
+                                            <InputText Class="form-control" Id="Name" @bind-Value="@CategoryModel.Name" required="required" />
+                                            <ValidationMessage For="@(()=>CategoryModel.Name)" />
+                                        </div>
+                                          <div class="form-group">
+                                            <label for="inputClientCompany">Tür</label>
+                                            <InputSelect Class="form-control" @bind-Value=CategoryModel.CategoryType required="required">
+                                                <option value="1">Cep Telefonları</option>
+                                                <option value="2">Tabletler</option>
+                                                <option value="3">Aksesuar</option>
+                                                <option value="4">Ses Ekipmanları</option>
+                                                <option value="5">Diğer</option>
+                                            </InputSelect>
+                                        </div>
+
+                                    </div>
+                                </div>
+                                <div class="modal-footer justify-content-between">
+                                    <button type="button" class="btn btn-default" data-dismiss="modal">Kapat</button>
+                                    <button type="submit" class="btn btn-primary" @onclick="NewCategoryAdd">Kaydet</button>
+                                </div>
+                            </EditForm>
+                        </div>
+                        <!-- /.modal-content -->
+                    </div>
+                    <!-- /.modal-dialog -->
+                </div>
+
+                <div class="modal fade" id="modal-default-marka">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h4 class="modal-title"> <i class="fas fa-edit"> </i> Yeni Marka Ekle</h4>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <EditForm Model="@Brandmodel">
+                                <div class="modal-body">
+
+                                    <div class="form-group">
+                                        @if (categories != null)
+                                        {
+                                            <InputSelectNumber @bind-Value="@Brandmodel.CategoryId" id="CategoryId" Class="form-control" required="required">
+                                                <option tabindex="0" value="0" selected>--- Lütfen Kategori Seçiniz--- </option>
+                                                @foreach (var data in categories)
+                                                {
+                                                    <option value="@data.Id">@data.Name</option>
+
+                                                }
+                                            </InputSelectNumber>
+                                        }
+
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="inputName">Marka Adı</label>
+                                        <InputText Class="form-control" Id="Name" @bind-Value="@Brandmodel.BrandName" required="required" />
+                                    </div>
+                                    
+                                </div>
+
+                                <div class="modal-footer justify-content-between">
+                                    <button type="button" class="btn btn-default" data-dismiss="modal">Kapat</button>
+                                    <button type="submit" class="btn btn-primary" @onclick="NewBrandAdd">Kaydet</button>
+                                </div>
+                            </EditForm>
+                        </div>
+                        <!-- /.modal-content -->
+                    </div>
+                    <!-- /.modal-dialog -->
+                </div>
+
+                <div class="modal fade" id="modal-default-model">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h4 class="modal-title"> <i class="fas fa-edit"> </i> Yeni Model Ekle</h4>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <EditForm Model="@lModel">
+                                <div class="modal-body">
+
+                                    <div class="form-group">
+                                        @if (categories != null)
+                                        {
+                                            <label for="inputStatus">Kategori</label>
+                                            <InputSelectNumber id="CategoryId" Class="form-control" required="required"
+                                                           ValueChanged="@((int value) => SelectCategory(value))"
+                                                           ValueExpression="@(() => lModel.CategoryId )"
+                                                           Value="lModel.CategoryId">
+                                                <option tabindex="0" value="0" selected>--- Lütfen Kategori Seçiniz--- </option>
+                                                @foreach (var data in categories)
+                                                {
+                                                    <option value="@data.Id">@data.Name</option>
+                                                }
+                                            </InputSelectNumber>
+                                        }
+
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="inputStatus">Marka</label>
+                                        @if (Brands != null)
+                                        {
+                                            <InputSelectNumber @bind-Value="@lModel.BrandId" id="BrandId" Class="form-control " required="required">
+
+                                                @foreach (var data in Brands)
+                                                {
+                                                    <option required="required" value="@data.Id">@data.BrandName</option>
+
+                                                }
+                                            </InputSelectNumber>
+                                        }
+                                        else
+                                        {
+                                            <select class="form-control">
+                                                <option tabindex="0" value="0" selected>--- Lütfen Marka Seçiniz--- </option>
+                                            </select>
+                                        }
+                                    </div>
+
+
+                                    <div class="form-group">
+                                        <label for="inputName">Model Adı</label>
+                                        <InputText Class="form-control" Id="Name" @bind-Value="@lModel.ModelName" required="required" />
+                                    </div>
+
+                                </div>
+
+                                <div class="modal-footer justify-content-between">
+                                    <button type="button" class="btn btn-default" data-dismiss="modal">Kapat</button>
+                                    <button type="submit" class="btn btn-primary" @onclick="NewModelAdd">Kaydet</button>
+                                </div>
+                            </EditForm>
+                        </div>
+                        <!-- /.modal-content -->
+                    </div>
+                    <!-- /.modal-dialog -->
+                </div>
+
+            </div>
+            <!-- /.card -->
+        </div>
+
+        <!-- /Marka listesi  -->
+
+
+        <div class="col-md-12">
+            <div class="card card-secondary">
+                <div class="card-header">
+                    <h3 class="card-title">Kategori Marka-Model Listesi</h3>
+
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    @if (CategoryBrands == null)
+                    {
+                        <p><em>Yükleniyor...</em></p>
+                    }
+                    else
+                    {
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                   
+                                    <th>Tür</th>
+                                    <th>Kategori Adı</th>
+                                    <th>Marka</th>
+                                    <th>Model</th>
+
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var i in CategoryBrands)
+                                {
+                                    <tr>
+
+
+                                        <td>@i.CategoryTypeName</td>
+                                        <td>@i.CategoryName</td>
+                                        <td>@i.BrandName</td>
+                                        <td>@i.ModelName</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                </div>
+                <!-- /.card-body -->
+            </div>
+            <!-- /.card -->
+        </div>
+    </div>
+
+
+</div>
+
+
+@code {
+        CategoryDto[] categories;
+        BrandDto[] Brands;
+        ModelDto[] Models;
+        CategoryBrandDto[] CategoryBrands;
+        CategoryDto CategoryModel = new CategoryDto();
+        BrandDto Brandmodel = new BrandDto();
+        ModelDto lModel = new ModelDto(); 
+    
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        categories = await categoryService.GetAllCategory();
+        CategoryBrands = await categoryService.CategoryBrandList();
+      
+
+    }
+    private async void NewCategoryAdd()
+    {
+        try
+        {
+            await categoryService.CategoryAdd(CategoryModel);
+            //toastService.ShowSuccess("Kayıt İşlemi Başarılı", CategoryModel.Name);
+            categories = await categoryService.GetAllCategory();
+            StateHasChanged();
+        }
+        catch (Exception)
+        {
+
+            toastService.ShowError("Hata Oluştu","!");
+        }
+       
+    }
+
+  
+
+    private async void Remove(int id)
+    {   
+        try
+        {
+            await categoryService.BrandRemove(id);
+
+            toastService.ShowWarning("Silme İşlemi Başarılı", null);
+            CategoryBrands = await categoryService.CategoryBrandList();
+            StateHasChanged();
+        }
+        catch (Exception)
+        {
+
+            toastService.ShowError("Hata Oluştu", "!");
+        }
+      
+      
+    }
+
+    private async void NewBrandAdd()
+    {
+        try
+        {
+            await categoryService.BrandAdd(Brandmodel);
+            toastService.ShowSuccess("Kayıt İşlemi Başarılı", Brandmodel.BrandName);
+            CategoryBrands = await categoryService.CategoryBrandList();
+            StateHasChanged();
+        }
+        catch (Exception)
+        {
+
+            toastService.ShowError("Hata Oluştu", "!");
+        }
+
+    }
+
+
+    void ProductFeatures()
+    {
+        NavigationManager.NavigateTo("/ProductFeatures");
+    }
+
+    private async Task SelectCategory(int value)
+    {
+
+        Brands = null;
+        lModel.CategoryId = value;
+        await ResultBrandist(value);
+        StateHasChanged();
+
+    }
+    private async Task ResultBrandist(int CategoryId)
+    {
+        Brands = await categoryService.Brands(CategoryId);
+        StateHasChanged();
+
+    }
+
+
+    private async void NewModelAdd()
+    {
+        try
+        {
+            await categoryService.ModelAdd(lModel);
+            toastService.ShowSuccess("Kayıt İşlemi Başarılı", lModel.ModelName);
+            CategoryBrands = await categoryService.CategoryBrandList();
+            StateHasChanged();
+        }
+        catch (Exception)
+        {
+
+            toastService.ShowError("Hata Oluştu", "!");
+        }
+
+
+}
+}

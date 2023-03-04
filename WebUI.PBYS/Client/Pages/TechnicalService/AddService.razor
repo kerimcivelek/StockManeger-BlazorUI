@@ -1,0 +1,240 @@
+﻿@page "/AddService"
+
+@inject ITechnicalService _technicalService;
+@inject IToastService toastService
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+
+<section class="content">
+
+    <!-- Default box -->
+    <div class="card">
+        <div class="card-header">
+            <div class=" card-title pull-left">
+                <a href="#" data-toggle="modal" data-target="#modal-default" class="btn btn-sm btn-primary"><i class="far fa-edit"></i> Yeni Servis Kaydı</a>
+                
+            </div>
+
+            <div class="card-tools">
+                <h3 class="card-title text-primary"> <strong><i class="fas fa-wrench"></i> Teknik Servis </strong> </h3>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-12 col-md-12 col-lg-12 order-2 order-md-1">
+                    <div class="row">
+                        <div class="col-12 col-sm-3">
+                            <div class="info-box bg-light">
+                                <div class="info-box-content">
+                                    <span class="info-box-text text-center text-muted"> <strong class="badge badge-danger">Bekleyen</strong> </span>
+                                    <span class="info-box-number text-center text-muted mb-0">  <strong>@models.Count(x=>x.ActionStatus==0)</strong>  </span>
+                                </div>
+                            </div>
+                        </div>
+                    
+                        <div class="col-12 col-sm-3">
+                            <div class="info-box bg-light">
+                                <div class="info-box-content">
+                                    <span class="info-box-text text-center text-muted"><strong class="badge badge-info">Tamamlanan</strong> </span>
+                                    <span class="info-box-number text-center text-muted mb-0"> <strong>@models.Count(x=>x.ActionStatus==1)</strong> </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-sm-3">
+                            <div class="info-box bg-light">
+                                <div class="info-box-content">
+                                    <span class="info-box-text text-center text-muted"> <strong class="badge badge-success">Teslim Edilen </strong> </span>
+                                    <span class="info-box-number text-center text-muted mb-0"> <strong>@models.Count(x=>x.ActionStatus==2)</strong> </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-sm-3">
+                            <div class="info-box bg-light">
+                                <div class="info-box-content">
+                                    <span class="info-box-text text-center text-muted"> <strong class="badge badge-warning">İptal Edilen </strong> </span>
+                                    <span class="info-box-number text-center text-muted mb-0"> <strong>@models.Count(x=>x.ActionStatus==3)</strong> </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12 ">
+                            @if (models == null)
+                            {
+                                <p><em>Yükleniyor...</em></p>
+                            }
+                            else
+                            {
+
+
+                                <table id="dtable" class=" table table-bordered table-striped table-hover  table-head-fixed text-nowrap ">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Tarih</th>
+                                            <th>Teslim Eden</th>
+                                            <th>Kayıt Açıklama</th>
+                                            <th>Gsm</th>
+                                            <th>Durum</th>
+                                            <th>İşlem Açıklama</th>
+                                           
+
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var i in models)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    <i class="btn btn-info btn-xs align-middle" @onclick="@(() => Detail(i.Id))"><i class="fas fa-edit"></i></i>
+                                                </td>
+                                                <td>@i.CreatedDate</td>
+                                                <td>@i.CustomerDescrition</td>
+                                                <td>@i.BugDefination</td>
+                                                <td>@i.Gsm</td>
+                                             
+                                                @if (i.ActionStatus==0)
+                                                {
+                                                    <td class="align-middle"><small class="badge badge-danger">Bekliyor</small>  </td>
+                                                }
+                                                else if (i.ActionStatus ==1)
+                                                {
+                                                    <td class="align-middle"><small class="badge badge-info">Tamamlandı</small>  </td>
+                                                }
+                                                else if (i.ActionStatus == 2)
+                                                {
+                                                    <td class="align-middle"><small class="badge badge-success">Teslim Edildi</small>  </td>
+                                                }
+                                                else
+                                                {
+                                                    <td class="align-middle"><small class="badge badge-warning">İptal Edildi</small>  </td>
+                                                }
+                                                <th>@i.DescriptionOfAction</th>
+                                              
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            }
+
+
+                        </div>
+                    </div>
+                </div>
+           
+
+            </div>
+        </div>
+        <!-- /.card-body -->
+    </div>
+
+
+
+                            <div class="modal fade" id="modal-default">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h4 class="modal-title"> <i class="fas fa-edit"> </i> Servis Kaydı Formu  </h4>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                     <EditForm Model="@model">
+                                        <div class="modal-body">
+
+                                            <div class="card-body">
+                                                
+                                                <div class="form-group">
+                                                    <label>Teslim Aden Adı Soyadı</label>
+                                                       <InputText Class="form-control" Id="Name" @bind-Value="@model.CustomerDescrition" />
+                                                </div>
+                                                <div class="form-group">
+                                                    <label>Gsm</label>
+                                                    <InputText Class="form-control" Id="Name" @bind-Value="@model.Gsm" />
+                                                </div>
+                                                <div class="form-group">
+                                                    <label>Servis Kayıt Açıklaması</label>
+                                <InputTextArea Class="form-control" style="height: 148px;" Id="Name" @bind-Value="@model.BugDefination" />
+                                                </div>
+                          
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer justify-content-between">
+                                            <button type="button" class="btn btn-default" data-dismiss="modal">Kapat</button>
+                        <button type="button" class="btn btn-primary" @onclick="New">Kaydet</button>
+                                        </div>
+                                    </EditForm>
+                                </div>
+                                <!-- /.modal-content -->
+                            </div>
+                            <!-- /.modal-dialog -->
+                        </div>
+
+</section>
+
+
+@code {
+    TechnicalServiceDto[] models;
+    TechnicalServiceDto model = new TechnicalServiceDto();
+    TechnicalServiceDto modeldetail = new TechnicalServiceDto();
+    protected override async Task OnInitializedAsync()
+    {
+        models = await _technicalService.GetAll();
+        await JSRuntime.InvokeVoidAsync("baseDataTables", "#dtable");
+
+    }
+
+
+    private async void New()
+    {
+
+        try
+        {
+            await _technicalService.Add(model);
+        }
+        catch (Exception e)
+        {
+            toastService.ShowSuccess(e.Message.ToString(), model.CustomerDescrition);
+
+        }
+        models = await _technicalService.GetAll();
+        StateHasChanged();
+
+
+    }
+
+    private async void Update()
+    {
+
+        try
+        {
+            await _technicalService.Add(modeldetail);
+        }
+        catch (Exception e)
+        {
+            toastService.ShowSuccess(e.Message.ToString(), modeldetail.CustomerDescrition);
+
+        }
+        models = await _technicalService.GetAll();
+        StateHasChanged();
+
+
+    }
+
+    private async void Edit(int Id)
+    {
+        modeldetail = await _technicalService.GetById(Id);
+ 
+        StateHasChanged();
+    }
+
+
+
+    void Detail(int Id)
+    {
+        NavigationManager.NavigateTo("/ServiceDetail/" + Id);
+    }
+
+
+
+}

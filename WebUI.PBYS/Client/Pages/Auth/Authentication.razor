@@ -1,0 +1,23 @@
+﻿
+@inherits ComponentBase
+@inject HttpClient Http
+@inject ILocalStorageService LocalStorage
+@inject ISessionStorageService SessionStorage
+@inject NavigationManager NavigationManager
+ 
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        var resulttoken = await SessionStorage.GetItemAsync<string>("token");
+        if (resulttoken == null)
+        {
+            NavigationManager.NavigateTo("/login/");
+        }
+       
+
+
+
+
+    }
+}

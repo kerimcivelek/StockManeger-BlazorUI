@@ -1,0 +1,148 @@
+﻿@inject ICategoryService categoryService
+@inject IToastService toastService
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+
+
+<div class="col-md-9">
+    <div class="card card-primary card-outline">
+        <div class="card-header">
+            <h3 class="card-title"> <i class="nav-icon fas fa-table"></i> Marka Listesi </h3>
+
+        </div>
+        <!-- /.card-header -->
+        <div class="card-body p-0">
+            <div class="mailbox-controls">
+
+                <div class="btn-group">
+                    <button type="button" class="btn btn-block btn-outline-info btn-sm" data-toggle="modal" data-target="#modal-default-marka">
+                        <i class="fas fa-plus"></i> Yeni Marka
+                    </button>
+                </div>
+                <hr />
+            </div>
+            <div class="table-responsive mailbox-messages">
+                @if (CategoryBrands == null)
+                {
+                    <p><em>Yükleniyor...</em></p>
+                }
+                else
+                {
+                    <table id="dtable" class="table table-bordered table-striped table-hover  table-head-fixed text-nowrap ">
+                        <thead>
+                            <tr>
+
+                                <th>Tür</th>
+                                <th>Kategori Adı</th>
+                                <th>Marka Adı</th>
+                                <th>Durum</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var i in CategoryBrands)
+                            {
+                                <tr>
+                                    <td>@i.CategoryTypeName</td>
+                                    <td>@i.CategoryName</td>
+                                    <td>@i.BrandName</td>
+                                    @if (i.Status == true)
+                                    {
+                                        <td class="align-middle"><small class="badge badge-success">Aktif</small>  </td>
+                                    }
+                                    else
+                                    {
+                                        <td class="align-middle"><small class="badge badge-warning">Pasif</small>  </td>
+                                    }
+
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+            </div>
+            <!-- /.mail-box-messages -->
+        </div>
+
+
+    </div>
+    <!-- /.card -->
+</div>
+
+
+
+<div class="modal fade" id="modal-default-marka">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title"> <i class="fas fa-edit"> </i> Yeni Marka Ekle</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <EditForm Model="@Brandmodel">
+                <div class="modal-body">
+
+                    <div class="form-group">
+                        @if (categories != null)
+                        {
+                            <InputSelectNumber @bind-Value="@Brandmodel.CategoryId" id="CategoryId" Class="form-control" required="required">
+                                <option tabindex="0" value="0" selected>--- Lütfen Kategori Seçiniz--- </option>
+                                @foreach (var data in categories)
+                                {
+                                    <option value="@data.Id">@data.Name</option>
+
+                                }
+                            </InputSelectNumber>
+                        }
+
+                    </div>
+                    <div class="form-group">
+                        <label for="inputName">Marka Adı</label>
+                        <InputText Class="form-control" Id="Name" @bind-Value="@Brandmodel.BrandName" required="required" />
+                    </div>
+
+                </div>
+
+                <div class="modal-footer justify-content-between">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Kapat</button>
+                    <button type="submit" class="btn btn-primary" @onclick="Add">Kaydet</button>
+                </div>
+            </EditForm>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+
+
+
+@code {
+    BrandDto[] Brands;
+    CategoryDto[] categories;
+    BrandDto Brandmodel = new BrandDto();
+    CategoryBrandDto[] CategoryBrands;
+     
+    protected override async Task OnInitializedAsync()
+    {
+        CategoryBrands = await categoryService.CategoryBrandList();
+        categories = await categoryService.GetAllCategory();
+        await JSRuntime.InvokeVoidAsync("baseDataTables", "#dtable");
+
+    }
+    private async void Add()
+    {
+        try
+        {
+            await categoryService.BrandAdd(Brandmodel);
+            CategoryBrands = await categoryService.CategoryBrandList();
+            StateHasChanged();
+           
+        }
+        catch (Exception e)
+        {
+            toastService.ShowSuccess(e.Message.ToString(), Brandmodel.BrandName);
+           
+        }
+
+    }
+}

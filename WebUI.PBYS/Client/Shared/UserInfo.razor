@@ -1,0 +1,39 @@
+﻿@inherits ComponentBase
+
+
+@inject IToastService toastService
+@inject IloginService loginservice;
+@inject ISessionStorageService SessionStorage
+@inject ILocalStorageService LocalStorage
+@inject NavigationManager NavigationManager
+@inject HttpClient Http
+
+
+    <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+        <div class="image">
+        <img src="dist/img/user.png" class="img-circle elevation-2" alt="User Image">
+        </div>
+        <div class="info">
+        <a role="button" class="d-block"> @logindto.FirstName @logindto.LastName </a>
+        </div>
+      </div>
+
+@code {
+    UserDto logindto = new UserDto();
+    int UserId;
+    protected override async Task OnInitializedAsync()
+    {
+        await loginservice.SetAuthorizationHeader();
+        var _userkey = await SessionStorage.GetItemAsync<Guid>("userkey");
+        var result = await loginservice.GetUserInfo(_userkey);
+
+        logindto.Id = result.Id;
+        logindto.FirstName = result.FirstName;
+        logindto.LastName = result.LastName;
+
+        UserId = result.Id;
+
+    }
+
+ 
+}

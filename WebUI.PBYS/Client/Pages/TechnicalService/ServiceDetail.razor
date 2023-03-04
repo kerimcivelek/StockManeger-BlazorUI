@@ -1,0 +1,177 @@
+﻿@page "/ServiceDetail/{Id:int}"
+
+@inject ITechnicalService _technicalService;
+@inject IToastService toastService
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+
+<section class="content">
+
+    <!-- Default box -->
+    <div class="card">
+        <div class="card-header">
+            <div class=" card-title pull-left">
+                <a  @onclick="BackToList" class="btn btn-sm btn-primary"><i class="far fa-edit"></i>Servis Listesi</a>
+                <NavLink class="nav-link" href="../AddService">
+                    <span class="oi oi-list-rich" aria-hidden="true"></span> Fetch data
+                </NavLink>
+
+            </div>
+
+            <div class="card-tools">
+                <h3 class="card-title text-primary"> <strong><i class="fas fa-list"></i> Servis Detay </strong> </h3>
+            </div>
+        </div>
+        <div class="card-body">
+          <div class="row">
+                <div class="col-12 col-md-12 col-lg-8 order-2 order-md-1">
+                    <EditForm Model="@modeldetail">
+                        <div class="tab-pane">
+                            <!-- The timeline -->
+                            <div class="timeline timeline-inverse">
+                                <!-- timeline time label -->
+                                <div class="time-label">
+                                    <span class="bg-danger">
+                                        @modeldetail.CreatedDate
+                                    </span>
+                                </div>
+                                <!-- /.timeline-label -->
+                                <!-- timeline item -->
+                                <div>
+                                    <i class="fas fa-user bg-primary"></i>
+
+                                    <div class="timeline-item">
+                                        <h3 class="timeline-header"><a href="#">Teslim Eden :  </a>  <strong> @modeldetail.CustomerDescrition  </strong>   </h3>
+
+
+
+                                    </div>
+                                </div>
+                                <div>
+                                    <i class="fas fa-pencil bg-primary"></i>
+
+                                    <div class="timeline-item">
+                                        <h3 class="timeline-header"><a href="#">Teslim Açıklaması  </a>    </h3>
+
+                                        <div class="timeline-body">
+                                            <InputTextArea Class="form-control" style="height: 148px;" Id="Name" @bind-Value="@modeldetail.BugDefination" />
+                                        </div>
+
+                                    </div>
+                                </div>
+                                <!-- END timeline item -->
+                                <!-- timeline item -->
+                                <div>
+                                    <i class="fas fa-phone bg-info"></i>
+
+                                    <div class="timeline-item">
+                                        <h3 class="timeline-header"><a href="#">Gsm :  </a>  <strong> @modeldetail.Gsm  </strong>   </h3>
+
+                                    </div>
+                                </div>
+                                <div>
+                                    <i class="fas fa-user bg-info"></i>
+
+                                    <div class="timeline-item">
+
+
+                                        <h3 class="timeline-header border-0">
+                                            <a href="#">Durum  </a>
+                                            <InputSelectNumber Class="form-control" @bind-Value=modeldetail.ActionStatus required="required">
+                                                <option value="0">Bekliyor</option>
+                                                <option value="1">Tamamlandı</option>
+                                                <option value="2">Teslim Edildi</option>
+                                                <option value="3">İptal Edildi</option>
+                                            </InputSelectNumber>
+                                        </h3>
+                                    </div>
+                                </div>
+                                <!-- END timeline item -->
+                                <!-- timeline item -->
+                                <div>
+                                    <i class="fas fa-comments bg-warning"></i>
+
+                                    <div class="timeline-item">
+                                     
+
+                                        <h3 class="timeline-header"><a href="#">Servis Kayıt Açıklaması</a></h3>
+
+                                        <div class="timeline-body">
+                                            <InputTextArea Class="form-control" style="height: 148px;" Id="Name" @bind-Value="@modeldetail.DescriptionOfAction" />
+                                        </div>
+                                        <div class="timeline-footer">
+                                            <a @onclick="Update" class="btn btn-warning btn-flat btn-sm">Kaydet</a>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                                <!-- END timeline item -->
+                                <div>
+                                    <i class="far fa-clock bg-gray"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </EditForm>
+              </div>
+           
+          </div>
+     
+        </div>
+        <!-- /.card-body -->
+    </div>
+
+ 
+</section>
+
+
+
+
+
+
+@*<div class="col-12 col-md-12 col-lg-4 order-1 order-md-2">
+    <h4 class="text-primary"><i class="fas fa-copy"></i>Detay</h4>
+ 
+
+
+</div>*@
+
+
+
+
+@code {
+
+    [Parameter]
+    public int Id { get; set; }
+
+    TechnicalServiceDto modeldetail = new TechnicalServiceDto();
+    protected override async Task OnInitializedAsync()
+    {
+        modeldetail = await _technicalService.GetById(Id);
+    }
+
+    private async void Update()
+    {
+
+        try
+        {
+            await _technicalService.Add(modeldetail);
+        }
+        catch (Exception e)
+        {
+            toastService.ShowSuccess(e.Message.ToString(), modeldetail.CustomerDescrition);
+
+        }
+ 
+        StateHasChanged();
+
+    }
+
+  
+
+    void BackToList()
+    {
+        NavigationManager.NavigateTo("../AddService");
+    }
+
+}

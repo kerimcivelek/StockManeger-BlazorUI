@@ -1,0 +1,147 @@
+﻿@inject ICategoryService categoryService
+@inject IToastService toastService
+@inject NavigationManager NavigationManager
+
+
+<div class="col-md-9">
+    <div class="card card-primary card-outline">
+        <div class="card-header">
+            <h3 class="card-title"><i class="nav-icon fas fa-table"></i> Kategori Listesi</h3>
+ 
+        </div>
+        <!-- /.card-header -->
+        <div class="card-body p-0">
+            <div class="mailbox-controls">
+                
+                <div class="btn-group">
+                    <button type="button" class="btn btn-block btn-outline-info btn-sm" data-toggle="modal" data-target="#modal-default">
+                        <i class="fas fa-plus"></i> Yeni Kategori
+                    </button>
+                </div>
+            </div>
+            <div class="table-responsive mailbox-messages">
+                @if (categories == null)
+                {
+                    <p><em>Yükleniyor...</em></p>
+                }
+                else
+                {
+                    <table class="table table-bordered table-striped table-hover  table-head-fixed text-nowrap ">
+                        <thead>
+                            <tr>
+
+                                <th>Tür</th>
+                                <th>Kategori Adı</th>
+                                <th>Durum</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var i in categories)
+                            {
+                                <tr>
+                                    <td>@i.CategoryTypeName</td>
+                                    <td>@i.Name</td>
+                                    @if (i.Status ==true)
+                                    {
+                                        <td class="align-middle"><small class="badge badge-success">Aktif</small>  </td>
+                                    }
+                                    else
+                                    {
+                                        <td class="align-middle"><small class="badge badge-warning">Pasif</small>  </td>
+                                    }
+                                  
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+            </div>
+            <!-- /.mail-box-messages -->
+        </div>
+
+
+    </div>
+    <!-- /.card -->
+</div>
+
+
+
+<div class="modal fade" id="modal-default">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title"> <i class="fas fa-edit"> </i> Yeni Kategori Ekle</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <EditForm Model="@CategoryModel">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+                <div class="modal-body">
+
+                    <div class="card-body">
+
+                        <div class="form-group">
+                            <label for="inputName">Kategori Adı</label>
+                            <InputText Class="form-control" Id="Name" @bind-Value="@CategoryModel.Name" required="required" />
+                            <ValidationMessage For="@(()=>CategoryModel.Name)" />
+                        </div>
+                        <div class="form-group">
+                            <label for="inputClientCompany">Tür</label>
+                            @if (basecategories != null)
+                            {
+                                <InputSelectNumber @bind-Value="@CategoryModel.CategoryType" id="CategoryType" Class="form-control " required="required">
+
+                                    @foreach (var data in basecategories)
+                                    {
+                                        <option required="required" value="@data.Id">@data.Name</option>
+
+                                    }
+                                </InputSelectNumber>
+                            }
+                            <ValidationMessage For="@(()=>CategoryModel.CategoryType)" />
+                        </div>
+
+                    </div>
+                </div>
+                <div class="modal-footer justify-content-between">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Kapat</button>
+                    <button type="submit" class="btn btn-primary" @onclick="NewCategoryAdd">Kaydet</button>
+                </div>
+            </EditForm>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+
+@code {
+    BaseCategoryDto[] basecategories;
+    CategoryDto[] categories;
+    CategoryDto CategoryModel = new CategoryDto();
+
+    protected override async Task OnInitializedAsync()
+    {
+        basecategories = await categoryService.BaseCategory();
+        categories = await categoryService.GetAllCategory();
+
+
+    }
+    private async void NewCategoryAdd()
+    {
+        try
+        {
+            await categoryService.CategoryAdd(CategoryModel);
+
+            categories = await categoryService.GetAllCategory();
+            StateHasChanged();
+        }
+        catch (Exception e)
+        {
+
+            toastService.ShowSuccess(e.Message.ToString(), CategoryModel.Name);
+        }
+
+    }
+}

@@ -1,0 +1,536 @@
+﻿@page "/ProductStock"
+
+@inject IProductStockService stockservice
+@inject IProductService productservice
+@inject IloginService loginservice;
+@inject ISessionStorageService SessionStorage
+@inject IToastService toastService
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+
+
+
+
+<div class="col-md-12">
+    <div class="card card-primary card-outline">
+        <div class="card-header">
+            <h3 class="card-title">
+                <i class="fas fa-edit"></i>
+                Ürün Stok İşlemleri
+            </h3>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card card-secondary">
+                @if (products == null)
+                {
+                    if (IsLoading)
+
+                    {
+@*
+                        <div class="text-center">
+                            <img src="/img/loading.gif">
+                        </div>*@
+                           <div class="d-flex justify-content-center">
+                            <div class="spinner-border text-primary" role="status">
+    <span class="sr-only">Liste Yükleniyor...</span>
+  </div>
+</div>
+                    }
+                    else
+                    {
+
+                    }
+                }
+                else
+                {
+
+
+                    <table id="tablestockprocess"
+                       class="table table-bordered table-striped table-hover  table-head-fixed text-nowrap ">
+                        <thead>
+                            <tr class="text-center">
+                                <th>İşlemler</th>
+                                <th>Tür</th>
+                                <th>Kategori</th>
+                                <th>Ürün Adı</th>
+                                <th>Dahili Hafıza</th>
+                                <th>Ram</th>
+                                <th>Renk</th>
+                                <th>Min</th>
+                                <th>Max</th>
+                                <th>Giriş</th>
+                                <th>Çıkış</th>
+                                <th>Stok</th>
+                                <th>#</th>
+
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var i in products)
+                            {
+                                <tr>
+                                    <td class="text-center">
+                                        <i class="btn btn-info btn-xs align-middle"
+                                   @onclick="@(() => ProductDetail(i.Id ,i.ProductDescription ))"><i class="fas fa-eye"></i></i>
+                                        <i class="btn btn-success btn-xs align-middle" data-toggle="modal" data-target="#modal-default"
+                                   @onclick="@(() => StockDetail(i.Id ,i.ProductDescription , i.TotalStock,i.CategoryTypeId ))">
+                                            <i class="fas fa-plus"></i>
+                                        </i>
+                                        <i class="btn btn-danger btn-xs align-middle" data-toggle="modal" data-target="#modal-defaultout"
+                                   @onclick="@(() => StockDetail(i.Id,i.ProductDescription,i.TotalStock , i.CategoryTypeId ))">
+                                            <i class="fas fa-minus"></i>
+                                        </i>
+                                    </td>
+                                    <td class="text-center">@i.CategoryType</td>
+                                    <td class="text-center">@i.CategoryName</td>
+                                    <td class="text-center"> <strong> @i.ProductDescription</strong> </td>
+                                    <td class="text-center">@i.Capacity</td>
+                                    <td class="text-center">@i.Ram</td>
+                                    <td class="text-center">@i.Colour</td>
+                                    <td class="text-center">@i.MinStock</td>
+                                    <td class="text-center">@i.MaxStock</td>
+                                    <td class="text-center">@i.TotalInStock</td>
+                                    <td class="text-center">@i.TotalOutStock</td>
+                                    <td class="text-center"> <strong>@i.TotalStock</strong> </td>
+                                    @if (i.TotalStock < i.MinStock)
+                                    {
+                                        <td class="text-center">
+                                            <i class="icon fas fa-exclamation-triangle text-danger" data-toggle="tooltip" data-placement="top"
+                                   title="Stok Seviyesi Min. Stok Altında"></i>
+                                        </td>
+
+                                    }
+                                    else if (i.TotalStock > i.MaxStock)
+                                    {
+                                        <td class="text-center">
+                                            <i class="icon fas fa-exclamation-triangle text-warning" data-toggle="tooltip"
+                                   data-placement="top" title="Stok Seviyesi Max. Stok Üzerinde"></i>
+                                        </td>
+                                    }
+                                    else
+                                    {
+                                        <td class="text-center"> <i class="icon fas fa-check text-success"></i> </td>
+                                    }
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+
+            </div>
+        </div>
+        <!-- /.model stock  -->
+        <div class="modal fade" id="modal-default">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title"> <i class="fas fa-edit"> </i>Stok Ekle </h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <EditForm Model="@stockmodel">
+                        <div class="modal-body">
+
+                            <div class="card-body">
+                                <h3 class="text-primary"><i class="nav-icon fas fa-barcode"></i> @ProduuctNameDesc (@StockCount)</h3>
+                                <hr />
+                                <label hidden="hidden">Id:@stockmodel.ProductId</label>
+
+                                <div class="form-group">
+                                    <label>Alınan Firma veya Şahıs Bilgileri</label>
+                                    <InputTextArea Class="form-control" Id="Name" @bind-Value="@stockmodel.CustomerDescrition" />
+                                </div>
+                                @if (IsAccessory == false)
+                                {
+                                    <div class="form-group">
+                                        <label>IMEI</label>
+                                        <InputText Class="form-control" Id="Name" @bind-Value="@stockmodel.IMEI" />
+                                    </div>
+                                }
+
+
+
+                                <div class="form-group">
+                                    <label for="inputClientCompany">İşlem Türü</label>
+                                    <InputSelect Class="form-control" @bind-Value=stockmodel.InOut required=required>
+                                        <option tabindex="0" value="1">Giriş</option>
+                                    </InputSelect>
+                                </div>
+                                @if (IsAccessory == false)
+                                {
+
+                                    <div class="form-group">
+                                        <label for="inputClientCompany">İkinci El</label>
+                                        <InputCheckbox @bind-Value="stockmodel.UsedDivace" />
+                                    </div>
+                                    @if (stockmodel.UsedDivace == true)
+                                    {
+                                        <div class="form-group">
+                                            <label>Tc Kimlik Numarası</label>
+                                            <InputText Class="form-control" Id="Name" @bind-Value="@stockmodel.Tckn" />
+                                        </div>
+                                    }
+                                }
+
+                                <div class="form-group">
+                                    <label>Adet</label>
+                                    <InputNumber Class="form-control" Id="Name" @bind-Value="@stockmodel.Quantity" />
+                                </div>
+                                <div class="form-group">
+                                    <label>Fiyat</label>
+                                    <InputNumber Class="form-control" Id="Name" @bind-Value="@stockmodel.Price" />
+                                </div>
+                                <div class="form-group">
+                                    <label>Ek Açıklama</label>
+                                    <InputTextArea Class="form-control" Id="Name" @bind-Value="@stockmodel.Descrition" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer justify-content-between">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Kapat</button>
+                            <button type="button" class="btn btn-primary" @onclick="ProductStockAdd">Kaydet</button>
+                        </div>
+                    </EditForm>
+                </div>
+                <!-- /.modal-content -->
+            </div>
+            <!-- /.modal-dialog -->
+        </div>
+        <div class="modal fade" id="modal-defaultout">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title"> <i class="fas fa-edit"> </i>Stok Çıkış </h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <EditForm Model="@stockmodel">
+                        <div class="modal-body">
+
+                            <div class="card-body">
+                                <h3 class="text-danger"><i class="nav-icon fas fa-barcode"></i> @ProduuctNameDesc (@StockCount) </h3>
+                                <hr />
+                                <label hidden="hidden">Id:@stockmodel.ProductId</label>
+                                <label hidden="hidden">Id:@stockmodel.EntryId==@stockmodel.ProductId</label>
+                                <div class="form-group">
+                                    <InputCheckbox @bind-Value="IsAccessory" hidden="hidden" />
+                                </div>
+
+                                @if (IsAccessory == false)
+                                {
+                                    <div class="form-group">
+                                        <label>Satış Yapılan Firma veya Şahıs Bilgileri</label>
+                                        <InputTextArea Class="form-control" Id="Name" @bind-Value="@stockmodel.CustomerDescrition" />
+                                    </div>
+                                    <div class="form-group">
+                                        <label>IMEI</label>
+                                        @if (ProductsInStock == null)
+                                        {
+
+                                            <div class="d-flex justify-content-center">
+                                                <div class="spinner-border text-primary" role="status">
+                                                    <span class="sr-only">Liste Yükleniyor...</span>
+                                                </div>
+                                            </div>
+                                        }
+                                        else {
+
+                                            <InputSelectNumber @bind-Value="@stockmodel.EntryId" Class="form-control">
+                                                <option tabindex="-1" value="0">---Çıkış Yapılacak IMEI Numarası Seçiniz--- </option>
+                                                @foreach (var data in ProductsInStock)
+                                                {
+                                                    <option value="@data.Id">@data.IMEI</option>
+
+                                                }
+                                            </InputSelectNumber>
+                                        }
+                                    </div>
+                                }
+                                @SelectedImei
+
+
+                                <div class="form-group">
+                                    <label for="inputClientCompany">İşlem Türü</label>
+                                    <InputSelect Class="form-control" @bind-Value=stockmodel.InOut>
+                                        <option value="0">Çıkış</option>
+                                    </InputSelect>
+                                </div>
+                                @if (IsAccessory == false)
+                                {
+                                    <div class="form-group">
+                                        <label for="inputClientCompany">İkinci El</label>
+                                        <InputCheckbox @bind-Value="stockmodel.UsedDivace" />
+                                    </div>
+                                    @if (stockmodel.UsedDivace == true)
+                                    {
+                                        <div class="form-group">
+                                            <label>Tc Kimlik Numarası</label>
+                                            <InputText Class="form-control" Id="Name" @bind-Value="@stockmodel.Tckn" />
+                                        </div>
+                                    }
+                                }
+
+                                <div class="form-group">
+
+                                    <label>Adet</label>
+                                    <InputNumber Class="form-control" Id="Name" @bind-Value="@stockmodel.Quantity" />
+                                </div>
+                                <div class="form-group">
+                                    <label>Fiyat</label>
+                                    <InputNumber Class="form-control" Id="Name" @bind-Value="@stockmodel.Price" />
+                                </div>
+                                <div class="form-group">
+                                    <label>Açıklama</label>
+                                    <InputTextArea Class="form-control" Id="Name" @bind-Value="@stockmodel.Descrition" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer justify-content-between">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Kapat</button>
+                            <button type="button" class="btn btn-primary" @onclick="ProductStockAdd">Çıkış Yap</button>
+                        </div>
+                    </EditForm>
+                </div>
+                <!-- /.modal-content -->
+            </div>
+            <!-- /.modal-dialog -->
+        </div>
+        <!-- / -->
+
+    </div>
+
+
+
+
+</div>
+<div class="row">
+
+    <div class="col-md-12">
+        <div class="card card-primary card-outline">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-filter"> </i> Ürün İşlem Detayları</h3>
+                @if (ProduuctNameDesc != null)
+                {
+                    <h4 class="text-primary text-center  "><i class="nav-icon fas fa-barcode"></i> @ProduuctNameDesc</h4>
+                }
+
+            </div>
+            <!-- /.card-header -->
+            <div class="card-body table-responsive p-0" style="height: 300px;">
+
+
+
+                @if (productStockDetailList == null)
+                {
+
+                    if (IsLoading)
+
+                    {
+                        @*
+                <div class="text-center">
+                <img src="/img/loading.gif">
+                </div>*@
+                        <div class="d-flex justify-content-center">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="sr-only">Liste Yükleniyor...</span>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <h5 class="text-primary text-center  "><i class="far fa-file-alt mr-1"></i> Ürün Seçilmemiş</h5>
+                    }
+                   
+
+                }
+                else
+                {
+                    <table class="table table-bordered table-striped table-hover table-head-fixed text-nowrap ">
+                        <thead>
+                            <tr>
+                                <th>Sil</th>
+                                <th>Tarih</th>
+                                <th>Müşteri Bilgileri</th>
+                                <th>IMEI</th>
+                                <th>İşlem</th>
+                                <th>Cihaz Durum</th>
+                                <th>Adet</th>
+                                <th>Fiyat</th>
+                                <th>Toplam</th>
+                                <th>İşlem Yapan</th>
+                                <th>Not</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var i in productStockDetailList)
+                            {
+                                <tr>
+                                    <td>
+                                        <button class="btn btn-warning btn-xs" @onclick="@(() => Remove(i.Id , i.ProductId))">
+                                            <i class="far fa-trash-alt"></i>
+                                        </button>
+                                    </td>
+                                    <td>@i.CreatedDate</td>
+                                    <td>@i.CustomerDescrition</td>
+                                    <td>@i.IMEI</td>
+                                    @if (i.InOut == "Giriş")
+                                    {
+                                        <td class="align-middle"><small class="badge badge-success">@i.InOut</small> </td>
+                                    }
+                                    else
+                                    {
+                                        <td class="align-middle"><small class="badge badge-warning">@i.InOut</small> </td>
+                                    }
+                                    <td>@i.UsedDivace</td>
+                                    <td>@i.Quantity</td>
+                                    <td>@i.Price</td>
+                                    <td>@i.TotalPrice</td>
+                                    <td>@i.username</td>
+                                    <td>@i.Descrition</td>
+
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+            </div>
+            <!-- /.card-body -->
+        </div>
+        <!-- /.card -->
+    </div>
+
+</div>
+
+
+
+
+@code {
+
+    StockListDto[] products;
+    ProductStockDto stockmodel = new ProductStockDto();
+    ProductStockDetailDto[] productStockDetailList;
+    ProductsInStockDto[] ProductsInStock;
+
+    public string ProduuctNameDesc { get; set; }
+    public int StockCount { get; set; }
+    public bool IsAccessory { get; set; }
+    public int lentryId { get; set; }
+    public int UserId { get; set; }
+    public string SelectedImei { get; set; }
+    public bool IsLoading { get; set; } = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var userkey = await SessionStorage.GetItemAsync<Guid>("userkey");
+        var result = await loginservice.GetUserInfo(userkey);
+
+        UserId = result.Id;
+
+        await Task.Run(OnLoading);
+    }
+
+    private async void OnLoading()
+    {
+      
+        products = await stockservice.ProductStockList();
+        await JSRuntime.InvokeVoidAsync("stockprocess", "#tablestockprocess");
+
+        IsLoading = false;
+        StateHasChanged();
+
+    }
+
+    private async void StockDetail(int Id, string ProductDescription, int TotalStock, int CategoryTypeId)
+    {
+
+
+        ClearData();
+
+        ProduuctNameDesc = ProductDescription;
+        stockmodel.ProductId = Id;
+
+        StockCount = TotalStock;
+
+        if (CategoryTypeId == 1 || CategoryTypeId == 2)
+        {
+            IsAccessory = false;
+        }
+        else
+        {
+            IsAccessory = true;
+        }
+        ProductsInStock = await stockservice.ProductInStock(Id);
+        StateHasChanged();
+
+    }
+
+    private async void ProductDetail(int ProductId, string ProductDescription)
+    {
+
+        productStockDetailList = await stockservice.ProductStockDetail(ProductId);
+        ProduuctNameDesc = ProductDescription;
+
+        StateHasChanged();
+        IsLoading = false;
+    }
+    private async void ProductStockAdd()
+    {
+
+        try
+        {
+            stockmodel.CreatedDate = DateTime.Now;
+            stockmodel.UserId = UserId;
+            await stockservice.ProductStockAdd(stockmodel);
+            ClearData();
+
+        }
+        catch (Exception e)
+        {
+
+            toastService.ShowWarning(e.Message.ToString(), ProduuctNameDesc);
+
+        }
+        productStockDetailList = await stockservice.ProductStockDetail(stockmodel.ProductId);
+        products = await stockservice.ProductStockList();
+        ProductsInStock = await stockservice.ProductInStock(stockmodel.ProductId);
+        StateHasChanged();
+
+    }
+
+    private async void Remove(int Id, int ProductId)
+    {
+        try
+        {
+            await stockservice.ProductStockRemove(Id, ProductId);
+
+
+        }
+        catch (Exception e)
+        {
+            toastService.ShowSuccess(e.Message.ToString(), ProduuctNameDesc);
+
+        }
+        productStockDetailList = await stockservice.ProductStockDetail(ProductId);
+        products = await stockservice.ProductStockList();
+        StateHasChanged();
+    }
+
+
+
+
+    private async void ClearData()
+    {
+        stockmodel.CustomerDescrition = null;
+        stockmodel.IMEI = null;
+        stockmodel.Descrition = null;
+        stockmodel.Quantity = 0;
+        stockmodel.Price = 0;
+        stockmodel.Tckn = null;
+
+
+    }
+}
